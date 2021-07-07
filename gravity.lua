@@ -16,6 +16,16 @@ function allowKeyboardKey(player)
 
 end
 
+function transformiceSettings()
+
+    tfm.exec.disableAutoShaman(true);
+    tfm.exec.disableAutoScore(true);
+    tfm.exec.disableAutoTimeLeft(true);
+    tfm.exec.disableAutoNewGame(true);
+    tfm.exec.disablePhysicalConsumables(true);
+
+end
+
 -- Gameplay functions
 
 function boostUp(player)
@@ -42,6 +52,9 @@ end
 
 function eventNewGame()
 
+    -- Apply transformice settings
+    transformiceSettings();
+
     -- Allow players to use keyboard commands
     for player in pairs (tfm.get.room.playerList) do
         allowKeyboardKey(player);
@@ -64,4 +77,5 @@ function eventKeyboard(player, key, push, x, y)
 end
 
 -- Go!
+transformiceSettings();
 tfm.exec.newGame(settings.maps[randomNumber(1, #settings.maps)]);
