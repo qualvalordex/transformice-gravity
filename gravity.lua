@@ -9,7 +9,8 @@ settings = {
 }
 
 round = {
-    playing = {}
+    playing = {},
+    current = 0
 }
 
 -- Configuration functions
@@ -28,6 +29,7 @@ function transformiceSettings()
     tfm.exec.disableAutoShaman(true);
     tfm.exec.disableAutoScore(true);
     tfm.exec.disableAutoTimeLeft(true);
+    tfm.exec.disableAutoNewGame(true);
     tfm.exec.disablePhysicalConsumables(true);
 
 end
@@ -70,6 +72,49 @@ function dropPlayer(player)
 
 end
 
+function startNewGame()
+
+    for player in pairs (tfm.get.room.playerList) do
+        tfm.exec.setPlayerScore(player, 0);
+        round['current'] = 0
+        tfm.exec.newGame(settings.maps[randomNumber(1, #settings.maps)]);
+    end
+
+end
+
+function roundControl(currentRound)
+
+    if currentRound >= 10 then
+        startNewGame();
+    end
+
+    round.current = round.current + 1;
+
+    return round.current;
+
+end
+
+function countdownToNewRound()
+    
+    tfm.exec.setGameTime(5);
+    system.newTimer(
+        function()
+            tfm.exec.newGame(settings.maps[randomNumber(1, #settings.maps)]);
+        end,
+        5000,
+        false
+    );
+
+end
+
+-- UI functions
+
+function displayRounds(currentRound)
+
+    ui.setShamanName('Round: ' .. currentRound .. '/' .. settings.maxRounds);
+
+end
+
 -- Misc functions
 
 function randomNumber(from, to)
@@ -94,6 +139,12 @@ function eventNewGame()
     -- Insert players to playing table
     fillPlayingTable();
 
+    -- Get current round
+    round.current = roundControl(round.current);
+
+    -- Display rounds at UI
+    displayRounds(round.current);
+
 end
 
 function eventKeyboard(player, key, push, x, y)
@@ -117,7 +168,7 @@ function eventPlayerWon(player)
 
     -- Set time to 3 seconds if there is not players playing
     if #round.playing == 0 then
-        tfm.exec.setGameTime(3);
+        countdownToNewRound();
     end
 
 end
@@ -129,7 +180,7 @@ function eventPlayerDied(player)
 
     -- Set time to 3 seconds if there is not players playing
     if #round.playing == 0 then
-        tfm.exec.setGameTime(3);
+        countdownToNewRound();
     end
 
 end
