@@ -5,7 +5,10 @@ settings = {
     keys = {70,86},
     maps = {"@7360360", "@7354902", "@6564904", "@7363888", "@7363948", "@7364036", "@7365232", "@7365480", "@7358021", "@7331732", "@7361954", "@6680292", "@7362214", "@7333317", "@7318326", "@7110000", "@7333302", "@6520404", "@7358506", "@7358514", "@7359645", "@2563872", "@606863", "@7357929", "@7357921", "@7356299", "@7355663", "@1854090", "@7355428", "@7355414", "@6331936", "@6330103", "@7354975", "@5452359", "@7354584", "@5615170", "@5628348", "@5628385", "@5632059", "@5632370", "@5636089", "@5638781", "@5638812", "@5688381", "@5688397", "@7356642", "@7357353", "@7356675"},
     roundTime = 90,
-    maxRounds = 10
+    maxRounds = 10,
+    admin = {
+        "Rufflesdqjo#0095"
+    }
 }
 
 round = {
@@ -37,6 +40,30 @@ end
 function roundSettings()
 
     tfm.exec.setGameTime(settings.roundTime);
+
+end
+
+-- Management functions
+
+function isAdmin(player)
+
+    for _,playerName in pairs (settings.admin) do
+        if playerName == player then
+            return true;
+        end
+    end
+    
+    return false;
+
+end
+
+function isMap(mapCode)
+
+    if string.find(mapCode, '@') == nil then
+        return false;
+    end
+
+    return true;
 
 end
 
@@ -123,6 +150,18 @@ function randomNumber(from, to)
 
 end
 
+function split(text)
+
+    local splitted = {};
+
+    for token in string.gmatch(text, "[^%s]+") do
+        table.insert(splitted, token);
+    end
+
+    return splitted;
+
+end
+
 -- Event functions
 
 function eventNewGame()
@@ -181,6 +220,26 @@ function eventPlayerDied(player)
     -- Set time to 3 seconds if there is not players playing
     if #round.playing == 0 then
         countdownToNewRound();
+    end
+
+end
+
+function eventChatCommand(player, message)
+
+    local splittedMessage = split(message);
+    local command = splittedMessage[1];
+
+    if command == 'np' and isAdmin(player) then
+        map = splittedMessage[2];
+        if isMap(map) then
+            print(map);
+            tfm.exec.newGame(map);
+        else
+            tfm.exec.chatMessage(
+                'Invalid map code. Please verify and try again.',
+                player
+            )
+        end
     end
 
 end
