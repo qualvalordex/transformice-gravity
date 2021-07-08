@@ -43,6 +43,12 @@ function roundSettings()
 
 end
 
+function resetControlVariables()
+
+    first = true;
+
+end
+
 -- Management functions
 
 function isAdmin(player)
@@ -134,6 +140,17 @@ function countdownToNewRound()
 
 end
 
+function givePoints(player)
+    
+    if first == true then
+        tfm.exec.setPlayerScore(player, 3, true);
+        first = false;
+    else
+        tfm.exec.setPlayerScore(player, 1, true);
+    end
+
+end
+
 -- UI functions
 
 function displayRounds(currentRound)
@@ -193,6 +210,9 @@ function eventNewGame()
     -- Display rounds at UI
     displayRounds(round.current);
 
+    -- Reset gameplay control variables
+    resetControlVariables();
+
 end
 
 function eventKeyboard(player, key, push, x, y)
@@ -210,6 +230,9 @@ function eventKeyboard(player, key, push, x, y)
 end
 
 function eventPlayerWon(player)
+
+    -- Give player points
+    givePoints(player);
 
     -- Remove player from playing table
     dropPlayer(player);
