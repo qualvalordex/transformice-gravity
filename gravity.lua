@@ -13,7 +13,11 @@ settings = {
 
 round = {
     playing = {},
-    current = 0
+    current = 0,
+    topScore = {
+        name = '',
+        score = 0
+    }
 }
 
 -- Configuration functions
@@ -109,15 +113,20 @@ function startNewGame()
 
     for player in pairs (tfm.get.room.playerList) do
         tfm.exec.setPlayerScore(player, 0);
-        round.current = 0;
-        tfm.exec.newGame(settings.maps[randomNumber(1, #settings.maps)]);
     end
+
+    round.current = 0;
+    round.topScore.name = '';
+    round.topScore.score = 0;
+
+    tfm.exec.newGame(settings.maps[randomNumber(1, #settings.maps)]);
 
 end
 
 function roundControl(currentRound)
 
     if currentRound >= 10 then
+        announceWinner();
         startNewGame();
     end
 
@@ -148,6 +157,32 @@ function givePoints(player)
     else
         tfm.exec.setPlayerScore(player, 1, true);
     end
+
+end
+
+function setTopScore()
+
+    for player in pairs (tfm.get.room.playerList) do
+        currentPlayerScore = tfm.get.room.playerList[player].score;
+        if currentPlayerScore > round.topScore.score then
+            round.topScore.name = player;
+            round.topScore.score = currentPlayerScore;
+        end
+    end
+
+    colorTopScore();
+
+end
+
+function colorTopScore()
+
+    tfm.exec.setNameColor(round.topScore.name, 0xFFFF00);
+
+end
+
+function announceWinner()
+
+    tfm.exec.chatMessage('Congratulations ' .. round.topScore.name .. '! You are the winner!');
 
 end
 
@@ -212,6 +247,9 @@ function eventNewGame()
 
     -- Reset gameplay control variables
     resetControlVariables();
+
+    -- Set top score
+    setTopScore();
 
 end
 
@@ -278,4 +316,4 @@ end
 
 -- Go!
 transformiceSettings();
-tfm.exec.newGame(settings.maps[randomNumber(1, #settings.maps)]);
+startNewGame();
