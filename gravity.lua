@@ -258,6 +258,7 @@ function eventKeyboard(player, key, push, x, y)
     if key == 38 then
         -- What happen if press up arrow?
         tfm.exec.killPlayer(player);
+    end
     
     if key == 70 then
         -- What happen if press F?
