@@ -103,7 +103,7 @@ function startNewGame()
 
     for player in pairs (tfm.get.room.playerList) do
         tfm.exec.setPlayerScore(player, 0);
-        round['current'] = 0
+        round.current = 0;
         tfm.exec.newGame(settings.maps[randomNumber(1, #settings.maps)]);
     end
 
