@@ -142,6 +142,12 @@ function displayRounds(currentRound)
 
 end
 
+function displayBackground()
+    
+    tfm.exec.addImage("160cca62473.png", "?1", 0, 0);
+
+end
+
 -- Misc functions
 
 function randomNumber(from, to)
@@ -180,6 +186,9 @@ function eventNewGame()
 
     -- Get current round
     round.current = roundControl(round.current);
+
+    -- Display background image
+    displayBackground();
 
     -- Display rounds at UI
     displayRounds(round.current);
