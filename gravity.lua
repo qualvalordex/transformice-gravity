@@ -23,6 +23,25 @@ round = {
     }
 }
 
+uiElements = {
+    text = {
+        en = {
+            roundLabel = 'Round: ',
+            winner1 = 'Congratulations ',
+            winner2 = '! You are the winner!',
+            welcomeMessage = '<font color=\'#C53DFF\'>Welcome to Gravity! Type !help to get some informations.</font>',
+            help = '<VP>The basic game controls are F to go up and V to go down. Remember you can\'t jump! Submit your suggestions in the oficial thread: https://atelier801.com/topic?f=6&t=859194&p=1</VP>'
+        },
+        br = {
+            roundLabel = 'Rodada: ',
+            winner1 = 'Parabéns ',
+            winner2 = '! Você é o vencedor!',
+            welcomeMessage = '<font color=\'#C53DFF\'>Seja bem-vindo ao Gravity! Digite !help para obter ajuda.</font>',
+            help = '<VP>Os comandos básicos do jogo são as teclas F para subir e V para descer. Lembre-se, você não pode pular! Envie suas sugestões no tópico oficial do jogo: https://atelier801.com/topic?f=6&t=859194&p=1<VP>'
+        }
+    }
+}
+
 -- Configuration functions
 
 function allowKeyboardKeys()
@@ -47,6 +66,7 @@ function transformiceSettings()
     system.disableChatCommandDisplay('addmap', true);
     system.disableChatCommandDisplay('rmmap', true);
     system.disableChatCommandDisplay('save', true);
+    system.disableChatCommandDisplay('help', true);
 
 end
 
@@ -142,6 +162,19 @@ function remMaps(mapCodes)
             end
         end
     end
+
+end
+
+function translate()
+
+    local community = tfm.get.room.community;
+    print(community);
+    -- Returns the table containing messages in portuguese
+    if community == 'pt' or community == 'br' then
+        return uiElements.text['br'];
+    end
+
+    return uiElements.text['en'];
 
 end
 
@@ -249,8 +282,12 @@ function colorTopScore()
 end
 
 function announceWinner()
+    
+    -- Get translation for winner texts
+    local winner1 = translate().winner1;
+    local winner2 = translate().winner2;
 
-    tfm.exec.chatMessage('Congratulations ' .. round.topScore.name .. '! You are the winner!');
+    tfm.exec.chatMessage(winner1 .. round.topScore.name .. winner2);
 
 end
 
@@ -258,13 +295,34 @@ end
 
 function displayRounds(currentRound)
 
-    ui.setShamanName('Round: ' .. currentRound .. '/' .. settings.maxRounds);
+    -- Get translation for round label
+    roundLabel = translate().roundLabel;
+
+    ui.setShamanName(roundLabel .. currentRound .. '/' .. settings.maxRounds);
 
 end
 
 function displayBackground()
     
     tfm.exec.addImage("160cca62473.png", "?1", 0, 0);
+
+end
+
+function displayWelcomeMessage(player)
+
+    -- Get translation for welcome message
+    local welcomeMessage = translate().welcomeMessage;
+
+    tfm.exec.chatMessage(welcomeMessage, player);
+
+end
+
+function displayHelpMessage(player)
+
+    -- Get translation for help message
+    local help = translate().help;
+
+    tfm.exec.chatMessage(help, player);
 
 end
 
@@ -419,10 +477,15 @@ function eventChatCommand(player, message)
     end
 
     -- Save map database
-    if command == 'save' then
+    if command == 'save' and isAdmin(player) then
         mapData = join(settings.maps, ' ');
         system.saveFile(mapData, 1);
         print('Database updated.');
+    end
+
+    -- Get help
+    if command == 'help' then
+        displayHelpMessage();
     end
 
 end
