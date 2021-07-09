@@ -8,7 +8,8 @@ settings = {
     roundTime = 90,
     maxRounds = 10,
     admin = {
-        "Rufflesdqjo#0095"
+        "Rufflesdqjo#0095",
+        "Ork#0015"
     },
     mapFile = 1
 }
