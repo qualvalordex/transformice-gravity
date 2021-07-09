@@ -102,7 +102,9 @@ function fillMapTable(mapData)
 
     settings.maps = {};
     for _,mapCode in pairs (split(mapData)) do
-        table.insert(settings.maps, mapCode);
+        if isMap(mapCode) then
+            table.insert(settings.maps, mapCode);
+        end
     end
 
 end
@@ -461,7 +463,7 @@ function eventChatCommand(player, message)
 
     -- Return all maps added to game
     if command == 'maps' then
-        print(join(settings.maps, ' '));
+        tfm.exec.chatMessage(join(settings.maps, ' '), player);
     end
 
     -- Add maps
