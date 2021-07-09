@@ -3,12 +3,14 @@
 
 settings = {
     keys = {70,86,38,87},
-    maps = {"@7360360", "@7354902", "@6564904", "@7363888", "@7363948", "@7364036", "@7365232", "@7365480", "@7358021", "@7331732", "@7361954", "@6680292", "@7362214", "@7333317", "@7318326", "@7110000", "@7333302", "@6520404", "@7358506", "@7358514", "@7359645", "@2563872", "@606863", "@7357929", "@7357921", "@7356299", "@7355663", "@1854090", "@7355428", "@7355414", "@6331936", "@6330103", "@7354975", "@5452359", "@7354584", "@5615170", "@5628348", "@5628385", "@5632059", "@5632370", "@5636089", "@5638781", "@5638812", "@5688381", "@5688397", "@7356642", "@7357353", "@7356675"},
+    maps = {"@7360360"},
+    mapsToAdd = {},
     roundTime = 90,
     maxRounds = 10,
     admin = {
         "Rufflesdqjo#0095"
-    }
+    },
+    mapFile = 1
 }
 
 round = {
@@ -39,6 +41,12 @@ function transformiceSettings()
     tfm.exec.disableAutoNewGame(true);
     tfm.exec.disablePhysicalConsumables(true);
 
+    system.disableChatCommandDisplay('maps', true);
+    system.disableChatCommandDisplay('np', true);
+    system.disableChatCommandDisplay('addmap', true);
+    system.disableChatCommandDisplay('rmmap', true);
+    system.disableChatCommandDisplay('save', true);
+
 end
 
 function roundSettings()
@@ -50,6 +58,31 @@ end
 function resetControlVariables()
 
     first = true;
+
+end
+
+function loadMaps()
+
+    local loadingMaps = system.loadFile(settings.mapFile);
+    local reloader;
+    reloader = system.newTimer(
+        function()
+            if not loadingMaps then
+                loadingMaps = system.loadFile(settings.mapFile);
+            end
+        end,
+        1000,
+        true
+    );
+
+end
+
+function fillMapTable(mapData)
+
+    settings.maps = {};
+    for _,mapCode in pairs (split(mapData)) do
+        table.insert(settings.maps, mapCode);
+    end
 
 end
 
@@ -74,6 +107,40 @@ function isMap(mapCode)
     end
 
     return true;
+
+end
+
+function isNewMap(mapCode)
+
+    for _,map in pairs (settings.maps) do
+        if mapCode == map then
+            print('This map just exists in database.');
+            return false;
+        end
+    end
+    return true;
+
+end
+
+function addMaps(mapCodes)
+
+    for _,mapCode in pairs (mapCodes) do
+        if isMap(mapCode) and isNewMap(mapCode) then
+            table.insert(settings.maps, mapCode);
+        end
+    end
+
+end
+
+function remMaps(mapCodes)
+
+    for _,mapCode in pairs (mapCodes) do
+        for index, map in ipairs (settings.maps) do
+            if mapCode == map then
+                table.remove(settings.maps, index);
+            end
+        end
+    end
 
 end
 
@@ -220,6 +287,18 @@ function split(text)
 
 end
 
+function join(table, separator)
+
+    local joined = '';
+
+    for _,item in pairs (table) do
+        joined = joined .. separator .. item;
+    end
+
+    return joined;
+
+end
+
 -- Event functions
 
 function eventNewGame()
@@ -312,7 +391,6 @@ function eventChatCommand(player, message)
     if command == 'np' and isAdmin(player) then
         map = splittedMessage[2];
         if isMap(map) then
-            print(map);
             tfm.exec.newGame(map);
         else
             tfm.exec.chatMessage(
@@ -322,8 +400,41 @@ function eventChatCommand(player, message)
         end
     end
 
+    -- Return all maps added to game
+    if command == 'maps' then
+        print(join(settings.maps, ' '));
+    end
+
+    -- Add maps
+    if command == 'addmap' and isAdmin(player) then
+        table.remove(splittedMessage, 1);
+        addMaps(splittedMessage);
+    end
+
+    -- Remove maps
+    if command == 'rmmap' and isAdmin(player) then
+        table.remove(splittedMessage, 1);
+        remMaps(splittedMessage);
+    end
+
+    -- Save map database
+    if command == 'save' then
+        mapData = join(settings.maps, ' ');
+        system.saveFile(mapData, 1);
+        print('Database updated.');
+    end
+
+end
+
+function eventFileLoaded(fileId, fileData)
+
+    if fileId == '1' then
+        fillMapTable(fileData);
+    end
+
 end
 
 -- Go!
 transformiceSettings();
+loadMaps();
 startNewGame();
